@@ -1,30 +1,30 @@
-package frameheader
+package frame
 
 import (
 	"errors"
 	"fmt"
 )
 
-type FrameHeader struct {
+type Header struct {
 	bitstream uint32
 	id        ID
 }
 
 const FrameSync uint32 = 0xffe00000
 
-func NewFrameHeader(bitstream uint32) (FrameHeader, error) {
-	f := FrameHeader{
+func NewHeader(bitstream uint32) (Header, error) {
+	f := Header{
 		bitstream: bitstream,
 	}
 
 	if err := f.validate(); err != nil {
-		return FrameHeader{}, err
+		return Header{}, err
 	}
 
 	return f, nil
 }
 
-func (f *FrameHeader) validate() error {
+func (f *Header) validate() error {
 	if !f.isValidSync() {
 		return errors.New("invalid frame sync bits")
 	}
@@ -36,15 +36,15 @@ func (f *FrameHeader) validate() error {
 	return nil
 }
 
-func (f *FrameHeader) isValidSync() bool {
+func (f *Header) isValidSync() bool {
 	return (f.bitstream & FrameSync) == FrameSync
 }
 
-func (f *FrameHeader) generateID() ID {
+func (f *Header) generateID() ID {
 	f.id = fromFrameHeader(f.bitstream)
 	return f.id
 }
 
-func (f FrameHeader) ID() ID {
+func (f Header) ID() ID {
 	return f.id
 }

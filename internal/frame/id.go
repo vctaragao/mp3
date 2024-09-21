@@ -1,4 +1,4 @@
-package frameheader
+package frame
 
 type ID uint32
 
