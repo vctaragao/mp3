@@ -18,6 +18,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("decoding mp3 file: %v", err)
 	}
+	mp3File.ShowID3v2Tag()
 
-	mp3File.ShowHeader()
+	// header := make([]byte, 256)
+	//
+	// if _, err := io.ReadFull(f, header); err != nil {
+	// 	panic(err)
+	// }
+	//
+	// for i, b := range header {
+	// 	fmt.Printf("%d: %08b - %s - %d\n", i, b, string(b), b)
+	// }
+	//
 }

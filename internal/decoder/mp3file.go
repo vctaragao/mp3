@@ -11,23 +11,26 @@ import (
 type mp3File struct {
 	file *os.File
 
-	ID3Header *d3.Header
-	Frame     frame.Frame
+	ID3v2 *d3.Tag
+	Frame frame.Frame
 }
 
 func NewMp3File(file *os.File) (mp3File, error) {
 	f := mp3File{file: file}
 
-	id3v2Header, err := d3.NewHeader(f.file)
+	id3v2Tag, err := d3.New(f.file)
 	if err != nil {
-		return f, fmt.Errorf("creating ID3v2 header: %w", err)
+		return f, fmt.Errorf("creating ID3v2 tag: %w", err)
 	}
 
-	f.ID3Header = id3v2Header
+	f.ID3v2 = id3v2Tag
 
 	return f, nil
 }
+func (f *mp3File) ShowID3v2Tag() {
+	fmt.Println(f.ID3v2)
+}
 
 func (f *mp3File) ShowHeader() {
-	fmt.Println(f.ID3Header)
+	fmt.Println(f.ID3v2.ID3Header)
 }

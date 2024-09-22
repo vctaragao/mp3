@@ -19,7 +19,6 @@ type Version int
 
 func (v Version) String() string {
 	return fmt.Sprintf("ID3v2.%d.x", v)
-
 }
 
 type Header struct {
