@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -18,11 +19,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("decoding mp3 file: %v", err)
 	}
-	mp3File.ShowID3v2Tag()
+	mp3File.ShowID3v2Header()
+	fmt.Println()
+	mp3File.ShowFramesHeader()
 
 	// header := make([]byte, 256)
-	//
-	// if _, err := io.ReadFull(f, header); err != nil {
+	// if _, err := f.ReadAt(header, 0); err != nil {
 	// 	panic(err)
 	// }
 	//
