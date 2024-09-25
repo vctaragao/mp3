@@ -20,7 +20,9 @@ func main() {
 		log.Fatalf("decoding mp3 file: %v", err)
 	}
 	mp3File.ShowID3v2Header()
+
 	fmt.Println()
+
 	mp3File.ShowFramesHeader()
 
 	// header := make([]byte, 256)

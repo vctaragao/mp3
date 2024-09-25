@@ -1,4 +1,4 @@
-package frame
+package bits
 
 type ID uint32
 
@@ -17,7 +17,7 @@ func (id ID) Int() int {
 	return int(id >> 19)
 }
 
-func fromFrameHeader(bitstream uint32) ID {
+func IDFromFrameHeader(bitstream uint32) ID {
 	fID := ID(bitstream)
 
 	if fID&MPEG1ID == MPEG1ID {

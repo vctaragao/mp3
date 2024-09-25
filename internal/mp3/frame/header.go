@@ -5,15 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/vctaragao/mp3/internal/mp3/bits"
 )
 
 type Header struct {
 	bitstream uint32
 
-	id ID
+	id bits.ID
 }
-
-const FrameSync uint32 = 0xfff00000
 
 func NewHeader(f *os.File, startAt int) (Header, error) {
 	bitstream := make([]byte, 4)
@@ -37,24 +37,29 @@ func (h *Header) validate() error {
 
 	h.generateID()
 
-	if h.id == MPEGReservedID || h.id == MPEG25ID {
-		return errors.New(fmt.Sprintf("invalid mpeg file id: %s", MPEGReservedID))
+	if h.id == bits.MPEGReservedID || h.id == bits.MPEG25ID {
+		return errors.New(fmt.Sprintf("invalid mpeg file id: %s", bits.MPEGReservedID))
 	}
 
 	return nil
 }
 
 func (h *Header) isValidSync() bool {
-	return (h.bitstream & FrameSync) == FrameSync
+	return (h.bitstream & bits.FrameSync) == bits.FrameSync
 }
 
 func (h *Header) generateID() {
-	h.id = fromFrameHeader(h.bitstream)
+	h.id = bits.IDFromFrameHeader(h.bitstream)
 }
 
-func (h Header) ID() ID {
+func (h *Header) parseLayer() {
+
+}
+
+func (h Header) ID() bits.ID {
 	return h.id
 }
+
 func (h Header) String() string {
 	return fmt.Sprintf("Bistream: %032b\nID: %s\n", h.bitstream, h.id)
 }
