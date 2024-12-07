@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/vctaragao/mp3/internal/decoder"
+	"github.com/vctaragao/mp3/internal/mp3"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 		panic(err)
 	}
 
-	d := decoder.NewDecoder()
+	d := mp3.NewDecoder()
 	mp3File, err := d.Decode(f)
 	if err != nil {
 		log.Fatalf("decoding mp3 file: %v", err)
@@ -24,14 +24,4 @@ func main() {
 	fmt.Println()
 
 	mp3File.ShowFramesHeader()
-
-	// header := make([]byte, 256)
-	// if _, err := f.ReadAt(header, 0); err != nil {
-	// 	panic(err)
-	// }
-	//
-	// for i, b := range header {
-	// 	fmt.Printf("%d: %08b - %s - %d\n", i, b, string(b), b)
-	// }
-	//
 }

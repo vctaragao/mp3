@@ -10,15 +10,15 @@ const (
 )
 
 func (id ID) String() string {
-	return []string{"MPEG25ID", "MPEG2ID", "MPEGReservedID", "MPEG1ID"}[id.Int()]
+	return []string{"MPEG2.5", "MPEG2", "MPEGReserved", "MPEG1"}[id.Int()]
 }
 
 func (id ID) Int() int {
 	return int(id >> 19)
 }
 
-func IDFromFrameHeader(bitstream uint32) ID {
-	fID := ID(bitstream)
+func (b BitStream) IDFromFrameHeader() ID {
+	fID := ID(b)
 
 	if fID&MPEG1ID == MPEG1ID {
 		return MPEG1ID

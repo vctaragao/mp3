@@ -10,9 +10,22 @@ import (
 )
 
 type Header struct {
-	bitstream uint32
+	bits.BitStream
 
-	id bits.ID
+	id              bits.ID
+	layer           bits.Layer
+	protectionBit   bool
+	bitRate         int
+	frequency       bits.Frequency
+	paddingBit      bool
+	privateBit      bool
+	chMode          bits.ChannelMode
+	modeExtention   *bits.ModeExtension
+	intensityStereo bool
+	msStereo        bool
+	copyright       bool
+	original        bool
+	emphasis        bits.Emphasis
 }
 
 func NewHeader(f *os.File, startAt int) (Header, error) {
@@ -21,7 +34,7 @@ func NewHeader(f *os.File, startAt int) (Header, error) {
 		return Header{}, fmt.Errorf("reading header bytes: %w", err)
 	}
 
-	h := Header{bitstream: binary.BigEndian.Uint32(bitstream)}
+	h := Header{BitStream: bits.BitStream(binary.BigEndian.Uint32(bitstream))}
 
 	if err := h.validate(); err != nil {
 		return Header{}, err
@@ -31,29 +44,43 @@ func NewHeader(f *os.File, startAt int) (Header, error) {
 }
 
 func (h *Header) validate() error {
-	if !h.isValidSync() {
-		return errors.New(fmt.Sprintf("invalid frame sync bits: %032b", h.bitstream))
+	if !h.IsValidSync() {
+		return errors.New(fmt.Sprintf("invalid frame sync bits: %032b", h.BitStream))
 	}
 
-	h.generateID()
+	h.id = h.IDFromFrameHeader()
 
 	if h.id == bits.MPEGReservedID || h.id == bits.MPEG25ID {
 		return errors.New(fmt.Sprintf("invalid mpeg file id: %s", bits.MPEGReservedID))
 	}
 
+	h.layer = h.ParseLayer()
+	h.protectionBit = h.HasProtectionBit()
+	h.bitRate = h.ParseBitRate(h.layer, h.id)
+	h.frequency = h.ParseSampeFrequency(h.id)
+	h.paddingBit = h.HasPaddingBit()
+	h.privateBit = h.HasPrivateBit()
+	h.chMode = h.ParseChannelMode()
+
+	if h.chMode.IsJointStereo() {
+		h.parseModeExtenstion()
+	}
+
+	h.copyright = h.HasCopyrightBit()
+	h.original = h.HasOriginalBit()
+	h.emphasis = h.ParseEmphasis()
+
 	return nil
 }
 
-func (h *Header) isValidSync() bool {
-	return (h.bitstream & bits.FrameSync) == bits.FrameSync
-}
+func (h *Header) parseModeExtenstion() {
+	if h.layer == bits.Layer3 {
+		h.intensityStereo, h.msStereo = h.ParseStereoInfo()
+		return
+	}
 
-func (h *Header) generateID() {
-	h.id = bits.IDFromFrameHeader(h.bitstream)
-}
-
-func (h *Header) parseLayer() {
-
+	mdExtension := h.ParseModeExtension()
+	h.modeExtention = &mdExtension
 }
 
 func (h Header) ID() bits.ID {
@@ -61,5 +88,21 @@ func (h Header) ID() bits.ID {
 }
 
 func (h Header) String() string {
-	return fmt.Sprintf("Bistream: %032b\nID: %s\n", h.bitstream, h.id)
+	return fmt.Sprintf("Bistream: %s\nID: %s\nLayer: %s\nProtection bit: %v\nBitRate: %v\nFrequency: %v\nPadding Bit: %v\nPrivate Bit: %v\nChannel Mode: %v\nMode Extension: %v\nItensity Stereo: %v\nMs Stereto: %v\nCopyright: %v\nOriginal: %v\nEmpashis: %v\n",
+		h.BitStream,
+		h.id,
+		h.layer,
+		h.protectionBit,
+		h.bitRate,
+		h.frequency,
+		h.paddingBit,
+		h.privateBit,
+		h.chMode,
+		h.modeExtention,
+		h.intensityStereo,
+		h.msStereo,
+		h.copyright,
+		h.original,
+		h.emphasis,
+	)
 }

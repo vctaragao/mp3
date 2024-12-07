@@ -94,8 +94,8 @@ var bitRateMap = map[BitRate]map[ID][]int{
 	},
 }
 
-func ParseBitRate(bitsStream uint32, layer Layer, id ID) int {
-	bitRate := parseBitRate(bitsStream)
+func (b BitStream) ParseBitRate(layer Layer, id ID) int {
+	bitRate := parseBitRate(b)
 
 	if bitRate == bitRateFree {
 		return 0
@@ -115,7 +115,7 @@ func ParseBitRate(bitsStream uint32, layer Layer, id ID) int {
 	return bitRateMap[bitRate][id][index]
 }
 
-func parseBitRate(bitStream uint32) BitRate {
+func parseBitRate(bitStream BitStream) BitRate {
 	b := BitRate(bitStream)
 
 	if b&bitRateBad == bitRateBad {
