@@ -19,6 +19,10 @@ func (f Frequency) String() string {
 	return []string{"44100", "22050", "11025", "48000", "24000", "12000", "32000", "16000", "8000", "reserved"}[f]
 }
 
+func (f Frequency) Int() int {
+	return []int{44100, 22050, 11025, 48000, 24000, 12000, 32000, 16000, 8000, 0}[f]
+}
+
 const (
 	sfIdentifer1 BitStream = 0x00000000 // 0000 0000 0000 0000 0000 0000 0000 0000
 	sfIdentifer2 BitStream = 0x00000400 // 0000 0000 0000 0000 0000 0100 0000 0000

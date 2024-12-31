@@ -26,6 +26,9 @@ type Header struct {
 	copyright       bool
 	original        bool
 	emphasis        bits.Emphasis
+
+	StartAtByte int
+	FinishByte  int
 }
 
 func NewHeader(f *os.File, startAt int) (Header, error) {
@@ -39,6 +42,9 @@ func NewHeader(f *os.File, startAt int) (Header, error) {
 	if err := h.validate(); err != nil {
 		return Header{}, err
 	}
+
+	h.StartAtByte = startAt
+	h.FinishByte = h.StartAtByte + len(bitstream)
 
 	return h, nil
 }
@@ -105,4 +111,22 @@ func (h Header) String() string {
 		h.original,
 		h.emphasis,
 	)
+}
+
+func (h Header) FrameLength() int {
+	padding := 0
+	if h.paddingBit {
+		padding = 1
+	}
+
+	if h.layer == bits.Layer1 {
+		return (12*h.bitRate/h.frequency.Int() + padding) * 4
+	}
+
+	fmt.Println("calculating for layer 3")
+	fmt.Println("bitRate", h.bitRate)
+	fmt.Println("frequency", h.frequency.Int())
+	fmt.Println("padding", padding)
+
+	return 144*h.bitRate*1000/h.frequency.Int() + padding
 }

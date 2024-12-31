@@ -1,10 +1,14 @@
 package mp3
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/vctaragao/mp3/internal/d3"
+	"github.com/vctaragao/mp3/internal/mp3/bits"
 	"github.com/vctaragao/mp3/internal/mp3/frame"
 )
 
@@ -58,8 +62,38 @@ func (f *File) parseFramesHeader() error {
 	return nil
 }
 
+// TODO: Parse Frames
 func (f *File) parseFrames() error {
-	return nil
+	frameData := make([]byte, f.Header.FrameLength())
+	if _, err := f.file.ReadAt(frameData, int64(f.Header.FinishByte)); err != nil {
+		return fmt.Errorf("reading first frame data after header: %w", err)
+	}
+
+	byiteIndex := 0
+	dataReader := bytes.NewReader(frameData)
+
+	for {
+		bitstream := make([]byte, 4)
+		n, err := dataReader.Read(bitstream)
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+
+			return fmt.Errorf("reading frame data: %w", err)
+		}
+		byiteIndex += n
+
+		b := binary.BigEndian.Uint32(bitstream)
+		if bits.BitStream(b)&bits.FrameSync == bits.FrameSync {
+			// TODO: It shows at 1044 position, just before the padding position
+			// The length of this frame is 1045
+			//
+			// TODO: It probably meas that as I read the frame body data I will need
+			// to be checking if I arrived at another frame header
+			fmt.Printf("Index: %d, %b\n", byiteIndex, b)
+		}
+	}
 }
 
 func (f *File) ShowID3v2Tag() {

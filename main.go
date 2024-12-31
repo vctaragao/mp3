@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -15,13 +14,9 @@ func main() {
 	}
 
 	d := mp3.NewDecoder()
-	mp3File, err := d.Decode(f)
+
+	_, err = d.Decode(f)
 	if err != nil {
 		log.Fatalf("decoding mp3 file: %v", err)
 	}
-	mp3File.ShowID3v2Header()
-
-	fmt.Println()
-
-	mp3File.ShowFramesHeader()
 }
